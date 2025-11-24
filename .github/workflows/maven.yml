@@ -32,7 +32,6 @@ jobs:
   release:
     needs: build
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v')  # Only run for tags like v1.0.0
     steps:
       - uses: actions/checkout@v4
 
