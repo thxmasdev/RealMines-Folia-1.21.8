@@ -865,7 +865,7 @@ public abstract class RMine {
             //if mine reset percentage is lower, reset it
             if (this.isResetBy(Reset.PERCENTAGE) & ((double) this.getRemainingBlocksPer() < this.getResetValue(Reset.PERCENTAGE))) {
                 this.kickPlayers(TranslatableLine.MINE_RESET_PERCENTAGE.get());
-                Bukkit.getScheduler().scheduleSyncDelayedTask(RealMinesAPI.getInstance().getPlugin(), this::reset, 10);
+                Bukkit.getRegionScheduler().runDelayed(RealMinesAPI.getInstance().getPlugin(), this.getPOS1(), task -> this.reset(), 10);
             }
         }
 
@@ -1040,9 +1040,9 @@ public abstract class RMine {
     }
 
     public void updateSigns() {
-        Bukkit.getScheduler().runTask(RealMinesAPI.getInstance().getPlugin(), () -> {
-            for (final MineSign ms : this.signs) {
-                if (ms.getBlock().getType().name().contains("SIGN")) {
+        for (final MineSign ms : this.signs) {
+            if (ms.getBlock().getType().name().contains("SIGN")) {
+                Bukkit.getRegionScheduler().execute(RealMinesAPI.getInstance().getPlugin(), ms.getBlock().getLocation(), () -> {
                     final Sign sign = (Sign) ms.getBlock().getState();
                     final String modif = ms.getModifier();
 
@@ -1088,9 +1088,9 @@ public abstract class RMine {
                     sign.setLine(0, Text.getPrefix());
                     sign.setLine(3, Text.color(this.getDisplayName()));
                     sign.update();
-                }
+                });
             }
-        });
+        }
     }
 
     public void clear() {
@@ -1163,7 +1163,7 @@ public abstract class RMine {
 
     public void highlight() {
         if (this.highlight) {
-            this.getHighlightedCube().forEach(location -> location.getWorld().spawnParticle(Particle.REDSTONE, location.getX(), location.getY(), location.getZ(), 0, 0.001, 1, 0, 1, new Particle.DustOptions(this.getMineColor().getColor(), 1)));
+            this.getHighlightedCube().forEach(location -> location.getWorld().spawnParticle(Particle.DUST, location.getX(), location.getY(), location.getZ(), 1, 0.001, 1, 0, new Particle.DustOptions(this.getMineColor().getColor(), 1)));
         }
     }
 

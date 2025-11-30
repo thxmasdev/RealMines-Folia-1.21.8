@@ -14,6 +14,7 @@ package joserodpt.realmines.plugin;
  */
 
 import org.bukkit.Bukkit;
+import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.BufferedReader;
@@ -35,7 +36,7 @@ public class UpdateChecker {
     }
 
     public void getVersion(final Consumer<String> consumer) {
-        Bukkit.getScheduler().runTaskAsynchronously(this.plugin, () -> {
+        Bukkit.getAsyncScheduler().runNow(this.plugin, (ScheduledTask t) -> {
             try (final InputStream inputStream = new URL("https://api.spigotmc.org/legacy/update.php?resource=" + this.resourceId).openStream(); final Scanner ignored = new Scanner(inputStream)) {
                 consumer.accept(new BufferedReader(new InputStreamReader(inputStream)).readLine());
             } catch (final IOException exception) {

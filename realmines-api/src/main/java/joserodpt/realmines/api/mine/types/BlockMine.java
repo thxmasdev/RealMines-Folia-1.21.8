@@ -87,7 +87,7 @@ public class BlockMine extends RMine {
             } else {
                 this.sortBlocks();
                 if (!super.getMineItems().isEmpty()) {
-                    Bukkit.getScheduler().runTask(RealMinesAPI.getInstance().getPlugin(), () -> {
+                    Bukkit.getRegionScheduler().execute(RealMinesAPI.getInstance().getPlugin(), this.getMineCuboid().getPOS1(), () -> {
                         //blocks
                         for (Block block : this.getMineCuboid()) {
                             Material set = this.getBlock();
@@ -155,7 +155,7 @@ public class BlockMine extends RMine {
             WorldEditUtils.setBlocks(new CuboidRegion(BukkitAdapter.adapt(this.getWorld()), point1, point2),
                     BukkitAdapter.adapt(Material.AIR.createBlockData()));
         } else {
-            this.getMineCuboid().clear();
+            Bukkit.getRegionScheduler().execute(RealMinesAPI.getInstance().getPlugin(), this.getMineCuboid().getPOS1(), () -> this.getMineCuboid().clear());
         }
     }
 }

@@ -27,6 +27,7 @@ import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.ItemFlag;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -132,8 +133,7 @@ public class GUIBuilder {
 
     public void setItem(final ClickRunnable executeOnClick, final ItemStack itemstack, final Integer slot) {
         final ItemMeta im = itemstack.getItemMeta();
-        im.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_DESTROYS, ItemFlag.HIDE_ENCHANTS,
-                ItemFlag.HIDE_PLACED_ON, ItemFlag.HIDE_POTION_EFFECTS, ItemFlag.HIDE_UNBREAKABLE);
+        addHideFlagsSafe(im);
         this.inv.setItem(slot, itemstack);
         this.runnables.put(slot, executeOnClick);
     }
@@ -170,10 +170,26 @@ public class GUIBuilder {
 
     public void addItem(final ClickRunnable clickRunnable, final ItemStack i, final int slot) {
         final ItemMeta im = i.getItemMeta();
-        im.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_DESTROYS, ItemFlag.HIDE_ENCHANTS,
-                ItemFlag.HIDE_PLACED_ON, ItemFlag.HIDE_POTION_EFFECTS, ItemFlag.HIDE_UNBREAKABLE);
+        addHideFlagsSafe(im);
         this.inv.setItem(slot, i);
         this.runnables.put(slot, clickRunnable);
+    }
+
+    private static void addHideFlagsSafe(final ItemMeta meta) {
+        if (meta == null) return;
+        addFlag(meta, "HIDE_ATTRIBUTES");
+        addFlag(meta, "HIDE_DESTROYS");
+        addFlag(meta, "HIDE_ENCHANTS");
+        addFlag(meta, "HIDE_PLACED_ON");
+        addFlag(meta, "HIDE_POTION_EFFECTS");
+        addFlag(meta, "HIDE_UNBREAKABLE");
+        addFlag(meta, "HIDE_ADDITIONAL_TOOLTIP");
+    }
+
+    private static void addFlag(final ItemMeta meta, final String flagName) {
+        try {
+            meta.addItemFlags(ItemFlag.valueOf(flagName));
+        } catch (IllegalArgumentException ignored) {}
     }
 
     @FunctionalInterface

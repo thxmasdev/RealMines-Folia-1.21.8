@@ -14,10 +14,11 @@ package joserodpt.realmines.api.mine.task;
  */
 
 import joserodpt.realmines.api.RealMinesAPI;
+import org.bukkit.Bukkit;
 import joserodpt.realmines.api.config.RPMineResetTasksConfig;
 import joserodpt.realmines.api.mine.RMine;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
+import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
+import java.util.concurrent.TimeUnit;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +30,7 @@ public class MineResetTask {
     private final String name;
     private final int delay;
     private final List<RMine> mines = new ArrayList<>();
-    private BukkitTask task;
+    private ScheduledTask task;
 
     public MineResetTask(final RealMinesAPI rm, final String name, final int delay, final Boolean nova) {
         this.rm = rm;
@@ -49,18 +50,15 @@ public class MineResetTask {
     }
 
     public void stopTimer() {
-        if (!this.task.isCancelled()) {
+        if (this.task != null && !this.task.isCancelled()) {
             this.task.cancel();
         }
     }
 
     public void startTimer() {
-        this.task = new BukkitRunnable() {
-            @Override
-            public void run() {
-                MineResetTask.this.mines.forEach(RMine::reset);
-            }
-        }.runTaskTimer(rm.getPlugin(), 0L, this.delay * 20L);
+        this.task = Bukkit.getAsyncScheduler().runAtFixedRate(rm.getPlugin(), (ScheduledTask t) -> {
+            MineResetTask.this.mines.forEach(RMine::reset);
+        }, 0, this.delay, TimeUnit.SECONDS);
 
     }
 

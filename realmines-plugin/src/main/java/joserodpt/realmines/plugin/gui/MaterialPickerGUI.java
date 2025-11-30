@@ -33,6 +33,7 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
+import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -163,7 +164,7 @@ public class MaterialPickerGUI {
 
                         if (current.display.containsKey(e.getRawSlot())) {
                             p.closeInventory();
-                            Bukkit.getScheduler().scheduleSyncDelayedTask(RealMinesAPI.getInstance().getPlugin(), () -> current.materialRunnable.selectedMaterial(current.display.get(e.getRawSlot())), 3);
+                            p.getScheduler().runDelayed(RealMinesAPI.getInstance().getPlugin(), (ScheduledTask t) -> current.materialRunnable.selectedMaterial(current.display.get(e.getRawSlot())), null, 3);
                         }
 
                         e.setCancelled(true);
@@ -252,7 +253,7 @@ public class MaterialPickerGUI {
 
     protected void exit(final Player p) {
         p.closeInventory();
-        Bukkit.getScheduler().scheduleSyncDelayedTask(RealMinesAPI.getInstance().getPlugin(), () -> materialRunnable.selectedMaterial(null), 3);
+        p.getScheduler().runDelayed(RealMinesAPI.getInstance().getPlugin(), (ScheduledTask t) -> materialRunnable.selectedMaterial(null), null, 3);
     }
 
     public Inventory getInventory() {

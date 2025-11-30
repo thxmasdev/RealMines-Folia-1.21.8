@@ -55,8 +55,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
+import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
+import java.util.concurrent.TimeUnit;
 
 import java.io.File;
 import java.util.Arrays;
@@ -73,7 +73,7 @@ public class RealMinesPlugin extends JavaPlugin {
 
     public Boolean newUpdate = false;
     private PluginManager pm = Bukkit.getPluginManager();
-    private BukkitTask mineHighlight;
+    private ScheduledTask mineHighlight;
     private Economy econ;
 
     @Override
@@ -183,13 +183,15 @@ public class RealMinesPlugin extends JavaPlugin {
         realMines.getMineResetTasksManager().loadTasks();
         getLogger().info("Loaded " + realMines.getMineManager().getMines().size() + " mines and " + realMines.getMineManager().getSigns().size() + " mine signs.");
         getLogger().info("Loaded " + realMines.getMineResetTasksManager().getTasks().size() + " mine tasks.");
-        this.mineHighlight = new BukkitRunnable() {
-            @Override
-            public void run() {
-                realMines.getMineManager().getMines().values().forEach(RMine::highlight);
-            }
-
-        }.runTaskTimerAsynchronously(this, 0, 10);
+        this.mineHighlight = Bukkit.getAsyncScheduler().runAtFixedRate(this, (ScheduledTask t) -> {
+            realMines.getMineManager().getMines().values().forEach(m -> {
+                if (m.hasTP()) {
+                    Bukkit.getRegionScheduler().execute(this, m.getTeleport(), () -> m.highlight());
+                } else {
+                    m.highlight();
+                }
+            });
+        }, 0, 500, TimeUnit.MILLISECONDS);
 
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new RealMinesPlaceholderAPI(realMines).register();

@@ -79,7 +79,7 @@ public class FarmMine extends RMine {
             while (!underBlocks.isEmpty()) {
                 Block block = underBlocks.get(0);
                 Material upMat = block.getRelative(BlockFace.UP).getType();
-                if (block.getType() != Material.WATER && (upMat == Material.AIR || upMat == Material.GRASS || upMat == Material.TALL_GRASS || FarmItem.getCrops().contains(upMat))) {
+                if (block.getType() != Material.WATER && (upMat == Material.AIR || upMat == Material.SHORT_GRASS || upMat == Material.TALL_GRASS || FarmItem.getCrops().contains(upMat))) {
                     this.mineGroundBlocks.add(block);
                 } else {
                     if (block.getType() != Material.WATER) {
@@ -94,9 +94,9 @@ public class FarmMine extends RMine {
     @Override
     public void clearContents() {
         if (this.oneBlockHeight()) {
-            this.getMineCuboid().clear();
+            Bukkit.getRegionScheduler().execute(RealMinesAPI.getInstance().getPlugin(), this.getMineCuboid().getPOS1(), () -> this.getMineCuboid().clear());
         } else {
-            this.mineGroundBlocks.forEach(block -> block.getRelative(BlockFace.UP).setType(Material.AIR));
+            Bukkit.getRegionScheduler().execute(RealMinesAPI.getInstance().getPlugin(), this.getMineCuboid().getPOS1(), () -> this.mineGroundBlocks.forEach(block -> block.getRelative(BlockFace.UP).setType(Material.AIR)));
         }
     }
 
@@ -108,7 +108,7 @@ public class FarmMine extends RMine {
         this.sortCrops();
 
         if (!super.getMineItems().isEmpty()) {
-            Bukkit.getScheduler().runTask(RealMinesAPI.getInstance().getPlugin(), () -> {
+            Bukkit.getRegionScheduler().execute(RealMinesAPI.getInstance().getPlugin(), this.getMineCuboid().getPOS1(), () -> {
                 if (this.oneBlockHeight()) {
                     for (Block target : this.getMineCuboid()) {
                         MineFarmItem fi = this.getFarmBlock();

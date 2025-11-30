@@ -31,6 +31,7 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
+import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -117,7 +118,7 @@ public class MineFacesGUI {
                                     current.load();
                                 } else {
                                     p.closeInventory();
-                                    Bukkit.getScheduler().scheduleSyncDelayedTask(current.rm.getPlugin(), () -> {
+                                    p.getScheduler().runDelayed(current.rm.getPlugin(), (ScheduledTask t) -> {
                                         final MaterialPickerGUI mpg = new MaterialPickerGUI(p, TranslatableLine.GUI_PICK_NEW_BLOCK_NAME.get(), MaterialPickerGUI.MaterialLists.ONLY_BLOCKS, mat -> {
                                             if (mat != null) {
                                                 current.m.setFaceBlock(getDirection(e.getRawSlot()), mat);
@@ -127,7 +128,7 @@ public class MineFacesGUI {
                                             va.openInventory(p);
                                         });
                                         mpg.openInventory(p);
-                                    }, 1);
+                                    }, null, 1);
                                 }
                         }
                     }

@@ -26,6 +26,7 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.plugin.java.JavaPlugin;
+import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -108,7 +109,7 @@ public class PercentageInput {
                         if (e.getRawSlot() == 8) {
                             //rodar ação de sucesso
                             p.closeInventory();
-                            Bukkit.getScheduler().scheduleSyncDelayedTask(current.rm, () -> current.acceptTask.run(current.percentage), 3);
+                            p.getScheduler().runDelayed(current.rm, (ScheduledTask t) -> current.acceptTask.run(current.percentage), null, 3);
                             return;
                         }
 

@@ -53,7 +53,7 @@ public class Items {
         final ItemMeta meta = item.getItemMeta();
         meta.setDisplayName(Text.color(name));
         meta.setLore(Text.color(desc));
-        meta.addEnchant(Enchantment.LUCK, 1, true);
+        meta.addEnchant(Enchantment.LUCK_OF_THE_SEA, 1, true);
         meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         item.setItemMeta(meta);
         return item;

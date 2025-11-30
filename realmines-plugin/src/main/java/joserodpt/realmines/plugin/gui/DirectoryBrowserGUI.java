@@ -32,6 +32,7 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
+import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 
 import java.io.File;
 import java.util.Arrays;
@@ -157,13 +158,13 @@ public class DirectoryBrowserGUI {
                                 current.loadDirectory(f);
                             } else {
                                 p.closeInventory();
-                                Bukkit.getScheduler().scheduleSyncDelayedTask(RealMinesAPI.getInstance().getPlugin(), () -> {
+                                p.getScheduler().runDelayed(RealMinesAPI.getInstance().getPlugin(), (ScheduledTask t) -> {
                                     try {
                                         current.onFileChoosen.fileRunnable(f);
                                     } catch (RMFailedToLoadException ex) {
                                         throw new RuntimeException(ex);
                                     }
-                                }, 3);
+                                }, null, 3);
                             }
                         }
                     }

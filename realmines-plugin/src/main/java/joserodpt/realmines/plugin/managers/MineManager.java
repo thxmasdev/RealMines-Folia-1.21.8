@@ -439,7 +439,10 @@ public class MineManager extends MineManagerAPI {
                 mine.getMineTimer().kill();
             }
             if (mine.getSigns() != null || !mine.getSigns().isEmpty()) {
-                mine.getSigns().forEach(ms -> ms.getBlock().getLocation().getWorld().getBlockAt(ms.getBlock().getLocation()).setType(Material.AIR));
+                mine.getSigns().forEach(ms -> {
+                    final Location loc = ms.getBlock().getLocation();
+                    Bukkit.getRegionScheduler().execute(rm.getPlugin(), loc, () -> loc.getWorld().getBlockAt(loc).setType(Material.AIR));
+                });
             }
             for (final MineResetTask task : rm.getMineResetTasksManager().getTasks()) {
                 if (task.hasMine(mine)) {

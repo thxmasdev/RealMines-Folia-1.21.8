@@ -11,6 +11,8 @@ package joserodpt.realmines.api.utils;
 
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
+import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
+import java.util.concurrent.TimeUnit;
 
 import java.util.function.Consumer;
 
@@ -20,7 +22,7 @@ public class Countdown implements Runnable {
     private final JavaPlugin plugin;
 
     // Our scheduled task's assigned id, needed for canceling
-    private Integer assignedTaskId;
+    private ScheduledTask assignedTask;
 
     // Seconds and shiz
     private final int seconds;
@@ -85,8 +87,8 @@ public class Countdown implements Runnable {
             this.afterTimer.run();
 
             // Cancel timer
-            if (this.assignedTaskId != null)
-                Bukkit.getScheduler().cancelTask(this.assignedTaskId);
+            if (this.assignedTask != null)
+                this.assignedTask.cancel();
             return;
         }
 
@@ -119,19 +121,18 @@ public class Countdown implements Runnable {
         return this.secondsLeft;
     }
 
-    public Integer getTaskId() {
-        return this.assignedTaskId;
+    public ScheduledTask getTaskId() {
+        return this.assignedTask;
     }
 
     public void killTask() {
-        Bukkit.getScheduler().cancelTask(this.assignedTaskId);
+        if (this.assignedTask != null) this.assignedTask.cancel();
     }
 
     /**
      * Schedules this instance to "run" every second
      */
     public void scheduleTimer() {
-        // Initialize our assigned task's id, for later use so we can cancel
-        this.assignedTaskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(this.plugin, this, 0L, 20L);
+        this.assignedTask = Bukkit.getAsyncScheduler().runAtFixedRate(this.plugin, (ScheduledTask t) -> this.run(), 0, 1, TimeUnit.SECONDS);
     }
 }

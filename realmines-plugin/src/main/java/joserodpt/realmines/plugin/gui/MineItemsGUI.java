@@ -42,6 +42,7 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
+import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -330,10 +331,10 @@ public class MineItemsGUI {
 
                                     case RIGHT:
                                         p.closeInventory();
-                                        Bukkit.getScheduler().scheduleSyncDelayedTask(current.rm.getPlugin(), () -> {
+                                        p.getScheduler().runDelayed(current.rm.getPlugin(), (ScheduledTask t) -> {
                                             final MineBreakActionsGUI v = new MineBreakActionsGUI(current.rm, p, current.mine, minItem, current.selectedBlockSet);
                                             v.openInventory(p);
-                                        }, 2);
+                                        }, null, 2);
                                         break;
                                     default:
                                         if (current.mine.getType() == RMine.Type.SCHEMATIC) {
@@ -367,7 +368,7 @@ public class MineItemsGUI {
                                         break;
                                     case SHIFT_LEFT:
                                         p.closeInventory();
-                                        Bukkit.getScheduler().scheduleSyncDelayedTask(current.rm.getPlugin(), () -> {
+                                        p.getScheduler().runDelayed(current.rm.getPlugin(), (ScheduledTask t2) -> {
                                             final MaterialPickerGUI mpg = new MaterialPickerGUI(p, TranslatableLine.GUI_SELECT_ICON_NAME.setV1(TranslatableLine.ReplacableVar.MINE.eq(blockSet.getKey())).get(), MaterialPickerGUI.MaterialLists.ALL_MATERIALS, mat -> {
                                                 if (mat != null) {
                                                     blockSet.setIcon(mat);
@@ -377,7 +378,7 @@ public class MineItemsGUI {
                                                 v.openInventory(p);
                                             });
                                             mpg.openInventory(p);
-                                        }, 2);
+                                        }, null, 2);
                                         break;
                                     case RIGHT:
                                         p.closeInventory();

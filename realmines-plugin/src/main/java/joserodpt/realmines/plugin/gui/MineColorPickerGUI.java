@@ -29,6 +29,7 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
+import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 
 import java.util.HashMap;
 import java.util.List;
@@ -114,7 +115,7 @@ public class MineColorPickerGUI {
                         }
                         gp.playSound(gp.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 50, 50);
                         gp.closeInventory();
-                        Bukkit.getScheduler().scheduleSyncDelayedTask(current.rm.getPlugin(), () -> current.rm.getGUIManager().openMine(current.mi, gp), 2);
+                        gp.getScheduler().runDelayed(current.rm.getPlugin(), (ScheduledTask t) -> current.rm.getGUIManager().openMine(current.mi, gp), null, 2);
                     }
                 }
             }

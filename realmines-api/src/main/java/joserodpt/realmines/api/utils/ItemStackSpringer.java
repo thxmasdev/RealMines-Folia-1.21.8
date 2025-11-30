@@ -448,19 +448,19 @@ public class ItemStackSpringer {
     public static Enchantment getEnchantmentByName(String name) {
         switch (name.toLowerCase()) {
             case "protection":
-                return Enchantment.PROTECTION_ENVIRONMENTAL;
+                return Enchantment.PROTECTION;
             case "fire_protection":
-                return Enchantment.PROTECTION_FIRE;
+                return Enchantment.FIRE_PROTECTION;
             case "feather_falling":
-                return Enchantment.PROTECTION_FALL;
+                return Enchantment.FEATHER_FALLING;
             case "blast_protection":
-                return Enchantment.PROTECTION_EXPLOSIONS;
+                return Enchantment.BLAST_PROTECTION;
             case "projectile_protection":
-                return Enchantment.PROTECTION_PROJECTILE;
+                return Enchantment.PROJECTILE_PROTECTION;
             case "respiration":
-                return Enchantment.OXYGEN;
+                return Enchantment.RESPIRATION;
             case "aqua_affinity":
-                return Enchantment.WATER_WORKER;
+                return Enchantment.AQUA_AFFINITY;
             case "thorns":
                 return Enchantment.THORNS;
             case "depth_strider":
@@ -470,37 +470,37 @@ public class ItemStackSpringer {
             case "binding_curse":
                 return Enchantment.BINDING_CURSE;
             case "sharpness":
-                return Enchantment.DAMAGE_ALL;
+                return Enchantment.SHARPNESS;
             case "smite":
-                return Enchantment.DAMAGE_UNDEAD;
+                return Enchantment.SMITE;
             case "bane_of_arthropods":
-                return Enchantment.DAMAGE_ARTHROPODS;
+                return Enchantment.BANE_OF_ARTHROPODS;
             case "knockback":
                 return Enchantment.KNOCKBACK;
             case "fire_aspect":
                 return Enchantment.FIRE_ASPECT;
             case "looting":
-                return Enchantment.LOOT_BONUS_MOBS;
+                return Enchantment.LOOTING;
             case "sweeping":
                 return Enchantment.SWEEPING_EDGE;
             case "efficiency":
-                return Enchantment.DIG_SPEED;
+                return Enchantment.EFFICIENCY;
             case "silk_touch":
                 return Enchantment.SILK_TOUCH;
             case "unbreaking":
-                return Enchantment.DURABILITY;
+                return Enchantment.UNBREAKING;
             case "fortune":
-                return Enchantment.LOOT_BONUS_BLOCKS;
+                return Enchantment.FORTUNE;
             case "power":
-                return Enchantment.ARROW_DAMAGE;
+                return Enchantment.POWER;
             case "punch":
-                return Enchantment.ARROW_KNOCKBACK;
+                return Enchantment.PUNCH;
             case "flame":
-                return Enchantment.ARROW_FIRE;
+                return Enchantment.FLAME;
             case "infinity":
-                return Enchantment.ARROW_INFINITE;
+                return Enchantment.INFINITY;
             case "luck_of_the_sea":
-                return Enchantment.LUCK;
+                return Enchantment.LUCK_OF_THE_SEA;
             case "lure":
                 return Enchantment.LURE;
             case "loyalty":

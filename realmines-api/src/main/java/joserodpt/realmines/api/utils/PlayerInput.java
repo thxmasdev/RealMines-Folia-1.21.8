@@ -23,8 +23,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
+import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
+import java.util.concurrent.TimeUnit;
 
 import java.util.HashMap;
 import java.util.List;
@@ -41,7 +41,7 @@ public class PlayerInput implements Listener {
 
     private final InputRunnable runGo;
     private final InputRunnable runCancel;
-    private final BukkitTask taskId;
+    private final ScheduledTask taskId;
     private boolean clearInput = true;
 
     public PlayerInput(final boolean clearInput, final Player p, final InputRunnable correct, final InputRunnable cancel) {
@@ -50,11 +50,9 @@ public class PlayerInput implements Listener {
         this.runGo = correct;
         this.runCancel = cancel;
         this.clearInput = clearInput;
-        this.taskId = new BukkitRunnable() {
-            public void run() {
-                p.getPlayer().sendTitle(PlayerInput.this.texts.get(0), PlayerInput.this.texts.get(1), 0, 21, 0);
-            }
-        }.runTaskTimer(RealMinesAPI.getInstance().getPlugin(), 0L, 20);
+        this.taskId = Bukkit.getAsyncScheduler().runAtFixedRate(RealMinesAPI.getInstance().getPlugin(), (ScheduledTask t) -> {
+            p.getPlayer().sendTitle(PlayerInput.this.texts.get(0), PlayerInput.this.texts.get(1), 0, 21, 0);
+        }, 0, 1, TimeUnit.SECONDS);
 
         this.register();
     }
@@ -89,9 +87,9 @@ public class PlayerInput implements Listener {
             String cleanInput = ChatColor.stripColor(Text.color(input));
             if (input.equalsIgnoreCase("cancel")) {
                 TranslatableLine.SYSTEM_INPUT_CANCELLED.send(p);
-                Bukkit.getScheduler().scheduleSyncDelayedTask(RealMinesAPI.getInstance().getPlugin(), () -> current.runCancel.run(cleanInput), 3);
+                p.getScheduler().runDelayed(RealMinesAPI.getInstance().getPlugin(), (ScheduledTask t) -> current.runCancel.run(cleanInput), null, 3);
             } else {
-                Bukkit.getScheduler().scheduleSyncDelayedTask(RealMinesAPI.getInstance().getPlugin(), () -> current.runGo.run(cleanInput), 3);
+                p.getScheduler().runDelayed(RealMinesAPI.getInstance().getPlugin(), (ScheduledTask t) -> current.runGo.run(cleanInput), null, 3);
             }
         } catch (final Exception e) {
             TranslatableLine.SYSTEM_ERROR_OCCURRED.send(p);
