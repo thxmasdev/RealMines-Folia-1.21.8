@@ -50,9 +50,9 @@ public class PlayerInput implements Listener {
         this.runGo = correct;
         this.runCancel = cancel;
         this.clearInput = clearInput;
-        this.taskId = Bukkit.getAsyncScheduler().runAtFixedRate(RealMinesAPI.getInstance().getPlugin(), (ScheduledTask t) -> {
-            p.getPlayer().sendTitle(PlayerInput.this.texts.get(0), PlayerInput.this.texts.get(1), 0, 21, 0);
-        }, 0, 1, TimeUnit.SECONDS);
+        this.taskId = p.getScheduler().runAtFixedRate(RealMinesAPI.getInstance().getPlugin(), (ScheduledTask t) -> {
+            p.sendTitle(PlayerInput.this.texts.get(0), PlayerInput.this.texts.get(1), 0, 21, 0);
+        }, null, 0, 20);
 
         this.register();
     }
@@ -82,7 +82,7 @@ public class PlayerInput implements Listener {
 
         try {
             current.taskId.cancel();
-            p.sendTitle("", "", 0, 1, 0);
+            p.getScheduler().run(RealMinesAPI.getInstance().getPlugin(), (ScheduledTask t) -> p.sendTitle("", "", 0, 1, 0), null);
             current.unregister();
             String cleanInput = ChatColor.stripColor(Text.color(input));
             if (input.equalsIgnoreCase("cancel")) {

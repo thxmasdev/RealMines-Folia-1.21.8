@@ -16,9 +16,11 @@ package joserodpt.realmines.api.utils;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.WorldEdit;
+import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.function.pattern.Pattern;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.Region;
+import joserodpt.realmines.api.RealMinesAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -26,15 +28,20 @@ import org.bukkit.World;
 public class WorldEditUtils {
 
     public static void setBlocks(Region region, Pattern pattern) {
-        try (EditSession editSession = WorldEdit.getInstance().newEditSessionBuilder()
-                .world(region.getWorld())
-                .build()) {
+        BlockVector3 min = region.getMinimumPoint();
+        org.bukkit.World bw = BukkitAdapter.adapt(region.getWorld());
+        org.bukkit.Location anchor = new org.bukkit.Location(bw, min.getX(), min.getY(), min.getZ());
 
-            editSession.setReorderMode(EditSession.ReorderMode.FAST);
-            editSession.setBlocks(region, pattern);
-        } catch (MaxChangedBlocksException exception) {
-            Bukkit.getLogger().warning("Error while setting blocks for RealMines: " + exception.getMessage());
-        }
+        Bukkit.getRegionScheduler().execute(RealMinesAPI.getInstance().getPlugin(), anchor, () -> {
+            try (EditSession editSession = WorldEdit.getInstance().newEditSessionBuilder()
+                    .world(region.getWorld())
+                    .build()) {
+                editSession.setReorderMode(EditSession.ReorderMode.FAST);
+                editSession.setBlocks(region, pattern);
+            } catch (MaxChangedBlocksException exception) {
+                Bukkit.getLogger().warning("Error while setting blocks for RealMines: " + exception.getMessage());
+            }
+        });
     }
 
     // blockvector3 to location function

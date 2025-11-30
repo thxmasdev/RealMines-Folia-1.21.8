@@ -57,7 +57,9 @@ public class MineResetTask {
 
     public void startTimer() {
         this.task = Bukkit.getAsyncScheduler().runAtFixedRate(rm.getPlugin(), (ScheduledTask t) -> {
-            MineResetTask.this.mines.forEach(RMine::reset);
+            MineResetTask.this.mines.forEach(m -> {
+                org.bukkit.Bukkit.getRegionScheduler().execute(rm.getPlugin(), m.getPOS1(), () -> m.reset());
+            });
         }, 0, this.delay, TimeUnit.SECONDS);
 
     }

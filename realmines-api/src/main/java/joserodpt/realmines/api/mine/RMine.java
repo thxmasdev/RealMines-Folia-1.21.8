@@ -751,9 +751,11 @@ public abstract class RMine {
                 WorldEditUtils.setBlocks(new CuboidRegion(BukkitAdapter.adapt(this.getWorld()), p1, p2), solid);
             }
         } else {
-            for (final Map.Entry<MineCuboid.CuboidDirection, Material> pair : this.faces.entrySet()) {
-                this.getMineCuboid().getFace(pair.getKey()).forEach(block -> block.setType(pair.getValue()));
-            }
+            Bukkit.getRegionScheduler().execute(RealMinesAPI.getInstance().getPlugin(), this.getMineCuboid().getPOS1(), () -> {
+                for (final Map.Entry<MineCuboid.CuboidDirection, Material> pair : this.faces.entrySet()) {
+                    this.getMineCuboid().getFace(pair.getKey()).forEach(block -> block.setType(pair.getValue()));
+                }
+            });
         }
     }
 
@@ -1107,7 +1109,13 @@ public abstract class RMine {
     public void kickPlayers(final String s) {
         if (this.getType() != Type.FARM) {
             if (RMConfig.file().getBoolean("RealMines.teleportPlayers")) {
-                this.getPlayersInMine().forEach(player -> RealMinesAPI.getInstance().getMineManager().teleport(player, this, this.isSilent(), false));
+                for (final org.bukkit.entity.Player p : org.bukkit.Bukkit.getOnlinePlayers()) {
+                    p.getScheduler().run(RealMinesAPI.getInstance().getPlugin(), (io.papermc.paper.threadedregions.scheduler.ScheduledTask t) -> {
+                        if (this.getMineCuboid() != null && this.getMineCuboid().contains(p.getLocation())) {
+                            RealMinesAPI.getInstance().getMineManager().teleport(p, this, this.isSilent(), false);
+                        }
+                    }, null);
+                }
             }
         }
         if (!this.isSilent()) {
@@ -1116,9 +1124,16 @@ public abstract class RMine {
     }
 
     public void broadcastMessage(String s) {
-        this.getPlayersInMine().forEach(p -> Text.send(p, s));
-        if (RMConfig.file().getBoolean("RealMines.actionbarMessages"))
-            this.getPlayersInMine().forEach(p -> p.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(Text.color(s))));
+        for (final org.bukkit.entity.Player p : org.bukkit.Bukkit.getOnlinePlayers()) {
+            p.getScheduler().run(RealMinesAPI.getInstance().getPlugin(), (io.papermc.paper.threadedregions.scheduler.ScheduledTask t) -> {
+                if (this.getMineCuboid() != null && this.getMineCuboid().contains(p.getLocation())) {
+                    Text.send(p, s);
+                    if (RMConfig.file().getBoolean("RealMines.actionbarMessages")) {
+                        p.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(Text.color(s)));
+                    }
+                }
+            }, null);
+        }
     }
 
     public List<Player> getPlayersInMine() {

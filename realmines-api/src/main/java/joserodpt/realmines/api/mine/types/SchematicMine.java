@@ -100,15 +100,23 @@ public class SchematicMine extends RMine {
         }
 
         if (defaultBlockSet.getItems().isEmpty()) {
-            for (Block block : this.getMineCuboid()) {
-                Material type = block.getType();
-                if (type == Material.AIR) {
-                    continue;
+            if (this.pasteClipboard != null) {
+                final java.util.HashSet<Material> mats = new java.util.HashSet<>();
+                final Region reg = this.pasteClipboard.getRegion();
+                for (BlockVector3 bv : reg) {
+                    final com.sk89q.worldedit.world.block.BlockState st = this.pasteClipboard.getBlock(bv);
+                    final org.bukkit.block.data.BlockData bd = BukkitAdapter.adapt(st);
+                    final Material type = bd.getMaterial();
+                    if (type != Material.AIR) mats.add(type);
                 }
-
-                defaultBlockSet.add(new MineSchematicItem(type));
+                for (Material m : mats) defaultBlockSet.add(new MineSchematicItem(m));
+            } else {
+                for (Block block : this.getMineCuboid()) {
+                    Material type = block.getType();
+                    if (type == Material.AIR) continue;
+                    defaultBlockSet.add(new MineSchematicItem(type));
+                }
             }
-
             this.saveData(MineData.BLOCKS);
         }
     }
@@ -121,8 +129,10 @@ public class SchematicMine extends RMine {
 
     @Override
     public void fillContent() {
-        this.placeSchematic(this.pasteClipboard, this.getPOS1());
-        super.fillFaces();
+        org.bukkit.Bukkit.getRegionScheduler().execute(RealMinesAPI.getInstance().getPlugin(), this.getPOS1(), () -> {
+            this.placeSchematic(this.pasteClipboard, this.getPOS1());
+            super.fillFaces();
+        });
     }
 
     @Override
@@ -156,6 +166,7 @@ public class SchematicMine extends RMine {
         if (clipboard != null) {
             try {
                 final EditSession editSession = WorldEdit.getInstance().newEditSession(BukkitAdapter.adapt(loc.getWorld()));
+                editSession.setReorderMode(EditSession.ReorderMode.FAST);
 
                 ClipboardHolder holder = new ClipboardHolder(clipboard);
                 Region region = clipboard.getRegion();
@@ -169,7 +180,7 @@ public class SchematicMine extends RMine {
                         .copyEntities(false)
                         .build();
 
-                Operations.completeLegacy(operation);
+                Operations.complete(operation);
                 editSession.flushSession();
 
                 BlockVector3 clipboardOffset = clipboard.getRegion().getMinimumPoint().subtract(clipboard.getOrigin());
@@ -186,14 +197,16 @@ public class SchematicMine extends RMine {
 
     @Override
     public void clearContents() {
-        if (RMConfig.file().getBoolean("RealMines.useWorldEditForBlockPlacement")) {
-            BlockVector3 point1 = BlockVector3.at(this.getMineCuboid().getPOS1().getX(), this.getMineCuboid().getPOS1().getY(), this.getMineCuboid().getPOS1().getZ());
-            BlockVector3 point2 = BlockVector3.at(this.getMineCuboid().getPOS2().getX(), this.getMineCuboid().getPOS2().getY(), this.getMineCuboid().getPOS2().getZ());
+        org.bukkit.Bukkit.getRegionScheduler().execute(RealMinesAPI.getInstance().getPlugin(), this.getMineCuboid().getPOS1(), () -> {
+            if (RMConfig.file().getBoolean("RealMines.useWorldEditForBlockPlacement")) {
+                BlockVector3 point1 = BlockVector3.at(this.getMineCuboid().getPOS1().getX(), this.getMineCuboid().getPOS1().getY(), this.getMineCuboid().getPOS1().getZ());
+                BlockVector3 point2 = BlockVector3.at(this.getMineCuboid().getPOS2().getX(), this.getMineCuboid().getPOS2().getY(), this.getMineCuboid().getPOS2().getZ());
 
-            WorldEditUtils.setBlocks(new CuboidRegion(BukkitAdapter.adapt(this.getWorld()), point1, point2),
-                    BukkitAdapter.adapt(Material.AIR.createBlockData()));
-        } else {
-            this.getMineCuboid().clear();
-        }
+                WorldEditUtils.setBlocks(new CuboidRegion(BukkitAdapter.adapt(this.getWorld()), point1, point2),
+                        BukkitAdapter.adapt(Material.AIR.createBlockData()));
+            } else {
+                this.getMineCuboid().clear();
+            }
+        });
     }
 }

@@ -185,10 +185,9 @@ public class RealMinesPlugin extends JavaPlugin {
         getLogger().info("Loaded " + realMines.getMineResetTasksManager().getTasks().size() + " mine tasks.");
         this.mineHighlight = Bukkit.getAsyncScheduler().runAtFixedRate(this, (ScheduledTask t) -> {
             realMines.getMineManager().getMines().values().forEach(m -> {
-                if (m.hasTP()) {
-                    Bukkit.getRegionScheduler().execute(this, m.getTeleport(), () -> m.highlight());
-                } else {
-                    m.highlight();
+                org.bukkit.Location anchor = m.hasTP() ? m.getTeleport() : m.getPOS1();
+                if (anchor != null) {
+                    Bukkit.getRegionScheduler().execute(this, anchor, () -> m.highlight());
                 }
             });
         }, 0, 500, TimeUnit.MILLISECONDS);

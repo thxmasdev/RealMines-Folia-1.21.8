@@ -38,8 +38,10 @@ public class MineTimer {
         this.count = new Countdown(RealMinesAPI.getInstance().getPlugin(), s, () -> {
             //
         }, () -> {
-            this.m.reset(RMine.ResetCause.TIMER);
-            this.startTask(this.m.getResetValue(RMine.Reset.TIME));
+            org.bukkit.Bukkit.getRegionScheduler().execute(RealMinesAPI.getInstance().getPlugin(), this.m.getPOS1(), () -> {
+                this.m.reset(RMine.ResetCause.TIMER);
+                this.startTask(this.m.getResetValue(RMine.Reset.TIME));
+            });
         }, (t) -> {
             if (RMConfig.file().getStringList("RealMines.announceTimes") != null && RMConfig.file().getStringList("RealMines.announceTimes").contains(String.valueOf(count.getSecondsLeft()))) {
                 if (this.m.isSilent()) return;

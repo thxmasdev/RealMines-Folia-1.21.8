@@ -299,31 +299,53 @@ public class MineManager extends MineManagerAPI {
     //permission for teleport: realmines.tp.<name>
     @Override
     public void teleport(final Player target, final RMine m, final Boolean silent, final Boolean checkForPermission) {
-        if (!silent) {
-            if (m.hasTP()) {
-                if (checkForPermission) {
-                    if (target.hasPermission("realmines.tp." + m.getName())) {
-                        target.teleport(m.getTeleport());
+        final org.bukkit.Location fallbackTop = this.computeTopOfMine(m);
 
-                        if (RMConfig.file().getBoolean("RealMines.teleportMessage")) {
-                            TranslatableLine.MINE_TELEPORT.setV1(TranslatableLine.ReplacableVar.MINE.eq(m.getDisplayName())).send(target);
-                        }
-                    } else {
-                        if (RMConfig.file().getBoolean("RealMines.teleportMessage")) {
-                            TranslatableLine.SYSTEM_ERROR_PERMISSION.send(target);
-                        }
-                    }
-                } else {
-                    target.teleport(m.getTeleport());
-                }
-            } else {
-                TranslatableLine.MINE_NO_TELEPORT_LOCATION.send(target);
-            }
-        } else {
-            if (m.hasTP()) {
-                target.teleport(m.getTeleport());
+        org.bukkit.Location dest = m.hasTP() ? m.getTeleport() : fallbackTop;
+        if (m.getMineCuboid() != null) {
+            final int topY = (int) Math.max(m.getMineCuboid().getPOS1().getY(), m.getMineCuboid().getPOS2().getY());
+            if (dest == null) dest = fallbackTop;
+            if (dest.getY() <= topY + 1) {
+                dest = new org.bukkit.Location(dest.getWorld(), dest.getX(), topY + 2, dest.getZ(), dest.getYaw(), dest.getPitch());
             }
         }
+
+        if (dest == null) {
+            TranslatableLine.MINE_NO_TELEPORT_LOCATION.send(target);
+            return;
+        }
+
+        if (checkForPermission && !target.hasPermission("realmines.tp." + m.getName())) {
+            if (RMConfig.file().getBoolean("RealMines.teleportMessage")) {
+                TranslatableLine.SYSTEM_ERROR_PERMISSION.send(target);
+            }
+            return;
+        }
+
+        target.teleportAsync(dest).thenAccept(success -> {
+            if (success && !silent && RMConfig.file().getBoolean("RealMines.teleportMessage")) {
+                target.getScheduler().run(rm.getPlugin(), (io.papermc.paper.threadedregions.scheduler.ScheduledTask t) -> {
+                    TranslatableLine.MINE_TELEPORT.setV1(TranslatableLine.ReplacableVar.MINE.eq(m.getDisplayName())).send(target);
+                }, null);
+            }
+        });
+    }
+
+    private org.bukkit.Location computeTopOfMine(final RMine m) {
+        if (m == null || m.getMineCuboid() == null || m.getWorld() == null) {
+            return m != null && m.hasTP() ? m.getTeleport() : rm.getPlugin().getServer().getWorlds().get(0).getSpawnLocation();
+        }
+
+        final org.bukkit.Location p1 = m.getMineCuboid().getPOS1();
+        final org.bukkit.Location p2 = m.getMineCuboid().getPOS2();
+        final double minX = Math.min(p1.getX(), p2.getX());
+        final double minZ = Math.min(p1.getZ(), p2.getZ());
+        final double maxX = Math.max(p1.getX(), p2.getX());
+        final double maxZ = Math.max(p1.getZ(), p2.getZ());
+        final double cx = (minX + maxX) / 2.0D;
+        final double cz = (minZ + maxZ) / 2.0D;
+        final int topY = (int) Math.max(p1.getY(), p2.getY());
+        return new org.bukkit.Location(m.getWorld(), cx + 0.5D, topY + 2, cz + 0.5D);
     }
 
     @Override
@@ -432,7 +454,12 @@ public class MineManager extends MineManagerAPI {
             Bukkit.getPluginManager().callEvent(new RealMinesMineChangeEvent(mine, RealMinesMineChangeEvent.ChangeOperation.REMOVED));
 
             if (RMConfig.file().getBoolean("RealMines.disableMineClearingWhenDeleting", false)) {
-                mine.clear();
+                org.bukkit.Location anchor = mine.getPOS1();
+                if (anchor != null) {
+                    Bukkit.getRegionScheduler().execute(rm.getPlugin(), anchor, mine::clear);
+                } else {
+                    mine.clear();
+                }
             }
 
             if (mine.getMineTimer() != null) {
